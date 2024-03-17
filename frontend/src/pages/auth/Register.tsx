@@ -7,16 +7,20 @@ import {
   Heading,
   Button,
   Link as ChakraLink,
+  useToast,
 } from "@chakra-ui/react";
+
+import axiosInstance from "../../utils/axios";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Link as ReactRouterLink } from "react-router-dom";
+import { useState } from "react";
 
 const formSchema = z.object({
-  firstName: z.string().min(3),
-  lastName: z.string().min(3),
+  first_name: z.string().min(3),
+  last_name: z.string().min(3),
   email: z.string().email(),
   password: z.string().min(6),
 });
@@ -24,24 +28,42 @@ const formSchema = z.object({
 type RegisterSchemaType = z.infer<typeof formSchema>;
 
 const RegisterPage = () => {
+  const [erross, setErross] = useState(null);
+  const toast = useToast();
+
   const {
     register,
+    reset,
     handleSubmit,
     formState: { isSubmitting, errors },
   } = useForm<RegisterSchemaType>({
     resolver: zodResolver(formSchema),
   });
   const isLoadingForm = isSubmitting;
+  console.log(erross);
 
-  const onSubmit = (data: RegisterSchemaType) => {
-    console.log("Form data:", data);
+  const onSubmit = async (data: RegisterSchemaType) => {
+    try {
+      const resp = await axiosInstance.post("auth/register", data);
+      toast({
+        position: "bottom-right",
+        title: "Account created.",
+        description: resp.data.status,
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+      reset();
+    } catch (error: AxiosError) {
+      setErross(error.response.data);
+    }
   };
 
   return (
     <div className="min-h-[calc(100vh-72px)] grid place-items-center">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-white w-[600px] p-6 rounded-md"
+        className="bg-white min-w-[600px] p-6 rounded-md mt-5"
       >
         <VStack spacing={"2rem"}>
           <Box>
@@ -60,11 +82,11 @@ const RegisterPage = () => {
               <Input
                 focusBorderColor="teal.500"
                 type="text"
-                {...register("firstName")}
+                {...register("first_name")}
               />
-              {errors.firstName && (
+              {errors.first_name && (
                 <span className="text-sm text-rose-600">
-                  {errors.firstName.message}
+                  {errors.first_name.message}
                 </span>
               )}
             </FormControl>
@@ -73,11 +95,11 @@ const RegisterPage = () => {
               <Input
                 focusBorderColor="teal.500"
                 type="text"
-                {...register("lastName")}
+                {...register("last_name")}
               />
-              {errors.lastName && (
+              {errors.last_name && (
                 <span className="text-sm text-rose-600">
-                  {errors.lastName.message}
+                  {errors.last_name.message}
                 </span>
               )}
             </FormControl>
@@ -93,6 +115,9 @@ const RegisterPage = () => {
               <span className="text-sm text-rose-600">
                 {errors.email.message}
               </span>
+            )}
+            {erross && (
+              <span className="text-sm text-rose-600">{erross.message}</span>
             )}
           </FormControl>
           <FormControl>
@@ -118,7 +143,11 @@ const RegisterPage = () => {
           >
             Register
           </Button>
-          <ChakraLink className="text-gray-500 font-semibold text-sm" as={ReactRouterLink} to="/login">
+          <ChakraLink
+            className="text-gray-500 font-semibold text-sm"
+            as={ReactRouterLink}
+            to="/login"
+          >
             If you already have an account, please log in.
           </ChakraLink>
         </VStack>

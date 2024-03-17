@@ -75,7 +75,7 @@ const Navabar = () => {
               Account
             </MenuButton>
             <MenuList>
-              <Link to="/register">
+              <Link to="/login">
                 <MenuItem>
                   Sign in
                   <svg

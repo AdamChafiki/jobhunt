@@ -3,6 +3,7 @@ import App from "../pages/main/App";
 import JobPage from "../pages/job/Job";
 import Navabar from "../components/navbar/Navbar";
 import RegisterPage from "../pages/auth/Register";
+import LoginPage from "../pages/auth/Login";
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ export const router = createBrowserRouter([
       {
         path: "/job",
         element: <JobPage />,
+      },
+      {
+        path: "/login",
+        element: <LoginPage />,
       },
     ],
   },
